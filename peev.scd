@@ -1,7 +1,7 @@
 (
 // if you want to set a different port for your server.
 // s = Server("peev",NetAddr("localhost",57556));
-// Server.default = s;
+// Server.default = s; 
 s.options.sampleRate = 48000;
 s.options.memSize = 262144;
 s.boot;
@@ -65,15 +65,15 @@ SynthDef(\mouth, {|amp=1, f=3305, fr=0.25, fd=0.2, ar=4, ad=0.9, fmod, amod, a=0
 	Out.ar(out, Pan2.ar(sig * env, pan));
 }).send(s);
 
-SynthDef(\gverb, {|roomsize, revtime, damping, inputbw, spread = 15, drylevel, earlylevel, taillevel, in=21|
+SynthDef(\gverb, {|roomsize, revtime, damping, inputbw, spread = 15, drylevel, earlylevel, taillevel, in=21, out=42|
 	var a = In.ar(in, 2);
-	Out.ar(0, GVerb.ar(a,roomsize,revtime,damping,inputbw,spread,drylevel,earlylevel,taillevel,roomsize,0.3)
+	Out.ar(out, GVerb.ar(a,roomsize,revtime,damping,inputbw,spread,drylevel,earlylevel,taillevel,roomsize,0.3)
 	)
 }).send(s);
 
-SynthDef(\unMuddy, {
-	var in = In.ar(0, 2);
-	ReplaceOut.ar(0, LeakDC.ar((BPeakEQ.ar(BPeakEQ.ar(BPeakEQ.ar(in, 220, 0.84.reciprocal, -1), 10000, 2, 1.0), 52, 0.5, 1.3)) * 0.7));
+SynthDef(\unMuddy, {|in=42|
+	var i = In.ar(in, 2);
+	Out.ar(0, BPeakEQ.ar(BPeakEQ.ar(BPeakEQ.ar(i, 250, 0.84.reciprocal, -1), 10000, 1.2, 1.5), 52, 0.5, 1.8) * 0.7);
 }).send(s);
 
 SynthDef(\getAmps, {
@@ -85,11 +85,11 @@ SynthDef(\getAmps, {
 }).send(s);
 
 SynthDef(\puff, {|a=1.03, c=1.01, gate=0, amp=1, out=0| 
-	var sig = Latoocarfian2DN.ar(3000, 48000, TRand.kr(1.0, 1.097, gate), LFBrownNoise2.kr(TExpRand.kr(12.0, 17.0, gate)).exprange(2.0, 2.09), c.lag(0.1), LFBrownNoise2.kr(TExpRand.kr(12.0, 17.0, gate)).range(1.041, 1.055), [0.3, 0.2, 0.1], mul: 0.12); 
+	var sig = Latoocarfian2DL.ar(3000, 48000, TRand.kr(1.0, 1.097, gate), LFBrownNoise2.kr(TExpRand.kr(12.0, 17.0, gate)).exprange(2.0, 2.09), c.lag(0.1), LFBrownNoise2.kr(TExpRand.kr(12.0, 17.0, gate)).range(1.041, 1.055), [0.3, 0.2, 0.1], mul: 0.1); 
 	Out.ar(out, OnePole.ar(LeakDC.ar(Splay.ar(sig)), 0.3) * amp.lag(2.0) * EnvGen.kr(Env.asr(4.0, 1, 10.0), gate));
 }).send(s);
 
-SynthDef(\munchy, {|gate = 1, vol = 1, out = 0|
+SynthDef(\munchy, {|gate = 1, vol = 0.7, out = 0|
 	var sig, n1, n2, amp, full, half, pitchyL, pitchyR;
 	sig=Fhn2DL.ar(20, 60, 0.2, 0.3, LFNoise1.kr(5.dup).range(0.1, 0.8), LFNoise0.kr(2.dup).range(0.1, 0.8), mul: 0.8).clip2(0.8);
 	n1 = LFBrownNoise0.kr(5.dup, 0.75, 2);
@@ -98,10 +98,10 @@ SynthDef(\munchy, {|gate = 1, vol = 1, out = 0|
 	full = BPeakEQ.ar(LPF.ar(LeakDC.ar(Friction.ar(sig, friction: n1.exprange(0.0004, 0.0012), mass: n2.exprange(0.42,0.5), spring: 0.99, mul: amp.squared * 18  + 7)), 12000), 13000, 0.5, -20).tanh;
 	pitchyL = Pitch.kr(LPF.ar(full[0],2500), minFreq: 40, median: 5, clar: 0.1);
 	pitchyR = Pitch.kr(LPF.ar(full[1],2500), minFreq: 40, median: 5, clar: 0.1);
-	half = Pulse.ar(([pitchyL[0], pitchyR[0]] * 0.5).max(10), mul: ([pitchyL[1], pitchyR[1]].lag(0.067) * amp * 0.3).squared);
+	half = Pulse.ar(([pitchyL[0], pitchyR[0]] * 0.5).max(18), mul: ([pitchyL[1], pitchyR[1]].lag(0.067) * amp * 0.3).squared);
 	sig = OnePole.ar(HPF.ar(full + DelayC.ar(half,0.2,0.1), 22), 0.25);
 	sig = Rotate2.ar(sig[0], sig[1], LFNoise2.kr(0.125, 0.5)) * LFNoise0.kr(0.5, 2, 1.9).max(0).round.lag(2.0) * 0.5 * EnvGen.kr(Env.asr(3.0, 1, 6), gate);
-	Out.ar(out, sig * vol * Line.kr(0, 1.0, 1));
+	Out.ar(out, sig * vol);
 }).send(s);
 
 SynthDef(\saddy, {|rate=0.5, spread=1.0, bufnum=0, gate=0, out=0|
@@ -136,9 +136,9 @@ SynthDef(\soothy, {|f_mul=1, r_mul=0.9, gate=1, amp=1, out=0|
 		).range(0, 7)).round, ratios) + (LFNoise2.kr(0.25).range(50, 56) * f_mul)).midicps.lag(0.067),
 		0,
 		LFNoise2.kr(2,0.3,0.5)
-	) * 0.5;
+	) * 0.667;
 	sig = Mix(sig).tanh;
-	del = CombN.ar(BPF.ar(sig.mean, 800, 0.2), 0.5, 0.4, 3);
+	del = CombN.ar(BPF.ar(sig.mean, 1200, 0.2), 0.5, 0.4, 3);
 	sigenv = EnvGen.kr(Env.asr(8, 1, 10), gate, doneAction: 2);
 	delenv = EnvGen.kr(Env.asr(8, 1, 10, 4), gate, doneAction: 2);
 	Out.ar(out, delenv * del.dup * 0.5 + Splay.ar(sig * sigenv, LFNoise2.kr(0.25, 0.5, 0.5)) * amp);
@@ -176,9 +176,9 @@ genArgs = {|n, i, makeOut = true|
 		fd = rrand(0.02, 0.5);
 		amp = rrand(0.6, 0.9);
 		(doneDid).if({
-			out = [0, 21, 23, 25, 27].wchoose([0.25, 0.275, 0.275, 0.1, 0.1]);
+			out = [42, 32, 34, 36, 38].wchoose([0.25, 0.275, 0.275, 0.1, 0.1]);
 		}, {
-			out = [0, 21, 23, 25, 27].wchoose([0.4, 0.225, 0.225, 0.05, 0.1]);
+			out = [42, 32, 34, 36, 38].wchoose([0.4, 0.225, 0.225, 0.05, 0.1]);
 		});
 	}, {
 		ar = exprand(2.0, 5.0);
@@ -193,7 +193,7 @@ genArgs = {|n, i, makeOut = true|
 			fr = fr * 0.1;
 		});
 		amp = rrand(0.7, 0.93).squared;
-		out = [0, 0, 0, 21, 23, 25, 25, 27].choose;
+		out = [42, 42, 42, 32, 34, 36, 36, 38].choose;
 	});
 	
 	(n <= 1).if({
@@ -337,14 +337,15 @@ soothIt = {
 		e.release;
 	});
 	puffIt = 0;
-	puff.set(\gate, 0);
+	freends.set(\gate, 0);
 	synths = [];
 	{
 		rrand(2, 4).do({
-			sooths.add(Synth(\soothy, [\f_mul, rrand(0.75, 1.05), \r_mul, rrand(0.75, 1.1), \amp, rrand(0.7, 1.0), \out, 27], goons));
+			sooths.add(Synth(\soothy, [\f_mul, rrand(0.75, 1.05), \r_mul, rrand(0.75, 1.1), \amp, rrand(0.8, 1.0), \out, 38], goons));
 			rrand(1.5, 3.0).wait;
 		});
 		rrand(5, 12.0).wait;
+		munch.set(\gate, 1);
 		sooths.do({|e, c|
 			e.release;
 		});
@@ -392,7 +393,7 @@ OSCdef(\clerk, {|msg, time|
 				hurt.set(\yes, 1);
 			}, {
 				(0.87.coin).if({ saddy.set(\gate, 0); });
-				puff.set(\amp, rrand(0.75, 1.0));
+				puff.set(\amp, rrand(0.75, 1.0).squared);
 				(0.1.coin).if({ hurt.set(\yes, 0) });
 			});
 		});
@@ -415,12 +416,12 @@ startUp = {
 		Synth(\unMuddy, target: goons);
 		
 		// play some gverbs
-		Synth(\gverb, [\roomsize, 5, \revtime, 0.6, \damping, 0.62, \inputbw, 0.48, \drylevel, -3.dbamp, \earlylevel, -11.dbamp, \taillevel, -13.dbamp, \in, 21], goons);
-		Synth(\gverb, [\roomsize, 16, \revtime, 1.24, \damping, 0.10, \inputbw, 0.95, \drylevel, -3.dbamp, \earlylevel, -15.dbamp, \taillevel, -17.dbamp, \in, 23], goons);
-		Synth(\gverb, [\roomsize, 80, \revtime, 4.85, \damping, 0.41, \inputbw, 0.19, \drylevel, -3.dbamp, \earlylevel, -12.dbamp, \taillevel, -14.dbamp, \in, 25], goons);
-		Synth(\gverb, [\roomsize, 243, \revtime, 1, \damping, 0.1, \inputbw, 0.34, \drylevel, -3.dbamp, \earlylevel, -13.dbamp, \taillevel, -11.dbamp, \in, 27], goons);
+		Synth(\gverb, [\roomsize, 5, \revtime, 0.6, \damping, 0.62, \inputbw, 0.48, \drylevel, -3.dbamp, \earlylevel, -11.dbamp, \taillevel, -13.dbamp, \in, 32], goons);
+		Synth(\gverb, [\roomsize, 16, \revtime, 1.24, \damping, 0.10, \inputbw, 0.95, \drylevel, -3.dbamp, \earlylevel, -15.dbamp, \taillevel, -17.dbamp, \in, 34], goons);
+		Synth(\gverb, [\roomsize, 80, \revtime, 4.85, \damping, 0.41, \inputbw, 0.19, \drylevel, -3.dbamp, \earlylevel, -12.dbamp, \taillevel, -14.dbamp, \in, 36], goons);
+		Synth(\gverb, [\roomsize, 243, \revtime, 1, \damping, 0.1, \inputbw, 0.34, \drylevel, -3.dbamp, \earlylevel, -13.dbamp, \taillevel, -11.dbamp, \in, 38], goons);
 		
-		hurt = Synth(\hurt, [\bufnum, voc.bufnum, \out, 27], goons);
+		hurt = Synth(\hurt, [\bufnum, voc.bufnum, \out, 36], goons);
 		
 		Synth(\saddy, [\bufnum, sad.bufnum, \rate, 0.4], saddy);
 		Synth(\saddy, [\bufnum, melo.bufnum, \spread, 0.5, \rate, 0.2], saddy);
@@ -468,7 +469,7 @@ startUp = {
 			});
 			(0.13.coin).if({
 				// double the mods for a little
-				var fr, ar, fd, r = List.new;
+				var fr, ar, fd;
 				synths.do({|e, c|
 					(0.6.coin).if({
 						ar = exprand(4.0, 11.0);
@@ -480,14 +481,9 @@ startUp = {
 						});
 						e.set(\ar, ar, \fr, fr, \fd, fd);
 						(fd.coin).if({
-							r.add(c);
+							e.release;
 						});
 					});
-				});
-				r.do({|e, c|
-					var t;
-					t = synths.removeAt(e);
-					{ rrand(2.0, 3.0).wait; t.release; }.fork;
 				});
 				{
 					rrand(2.0, 5.0).wait;

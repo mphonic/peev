@@ -6,7 +6,7 @@ s.options.sampleRate = 48000;
 s.options.memSize = 262144;
 s.boot;
 s.doWhenBooted{
-var sb, sad, melo, voc, genArgs, nudgeArgs, playThem, stopThem, synths, holdIt = false, puff, puffIt = 0, munch, goons, saddy, freends, hurt, amper, eTime = 37, doneDid = false, startUp, shutDown, win, butt, acs;
+var sb, sad, melo, voc, genArgs, nudgeArgs, playThem, stopThem, synths, holdIt = false, puff, puffIt = 0, soothIt, munch, goons, saddy, freends, hurt, amper, eTime = 37, doneDid = false, startUp, shutDown, win, butt, acs;
 
 sb = Environment.make({
 	~b = Buffer.alloc(s, 2048, 1, {|buf|
@@ -124,6 +124,24 @@ SynthDef(\hurt, {|bufnum=0, yes=0, out=0|
 	sig = PlayBuf.ar(1, bufnum, BufRateScale.kr(bufnum) * TRand.kr(0.5.dup, 1.0, v), yes, TRand.kr(0, BufFrames.kr(bufnum), yes), 1) * v;
 	sig = Rotate2.ar(sig[0],sig[1],LFBrownNoise2.kr(0.25, mul: 0.4)) * e;
 	Out.ar(out, sig);
+}).send(s);
+
+SynthDef(\soothy, {|f_mul=1, r_mul=0.9, gate=1, amp=1, out=0|
+	var ratios, sig, del, sigenv, delenv;
+	ratios = [19.02, 21.69, 0, 28.98, 26.04, 33.69, 12, 31.02];
+	sig = VarSaw.ar(
+		(Select.kr((Hasher.kr(
+			Latch.kr(SinOsc.kr((1..4)!2 * r_mul),Impulse.kr([0.5,0.833] * r_mul)
+			)
+		).range(0, 7)).round, ratios) + (LFNoise2.kr(0.25).range(50, 56) * f_mul)).midicps.lag(0.067),
+		0,
+		LFNoise2.kr(2,0.3,0.5)
+	) * 0.5;
+	sig = Mix(sig).tanh;
+	del = CombN.ar(BPF.ar(sig.mean, 800, 0.2), 0.5, 0.4, 3);
+	sigenv = EnvGen.kr(Env.asr(8, 1, 10), gate, doneAction: 2);
+	delenv = EnvGen.kr(Env.asr(8, 1, 10, 4), gate, doneAction: 2);
+	Out.ar(out, delenv * del.dup * 0.5 + Splay.ar(sig * sigenv, LFNoise2.kr(0.25, 0.5, 0.5)) * amp);
 }).send(s);
 
 // generate Synth args
@@ -313,13 +331,40 @@ stopThem = {
 	synths = [];	
 };
 
+soothIt = {
+	var n = synths.size, sooths = List.new;
+	synths.do({|e, c|
+		e.release;
+	});
+	puffIt = 0;
+	puff.set(\gate, 0);
+	synths = [];
+	{
+		rrand(2, 4).do({
+			sooths.add(Synth(\soothy, [\f_mul, rrand(0.75, 1.05), \r_mul, rrand(0.75, 1.1), \amp, rrand(0.7, 1.0), \out, 27], goons));
+			rrand(1.5, 3.0).wait;
+		});
+		rrand(5, 12.0).wait;
+		sooths.do({|e, c|
+			e.release;
+		});
+		(synths.size < 3).if({
+			playThem.value(n);
+		});
+	}.fork;	
+};
 // mouse click and NaN OSC responder 
 OSCdef(\clerk, {|msg, time|
 	(msg[2] < 1001).if({
 		(holdIt.not).if({
 			holdIt = true;
 			(msg[3] > 0).if({
-				playThem.value(rrand(eTime.lincurve(5, 37.0, 1, 6, -4), eTime.lincurve(5, 37.0, 1, 13, -4)).round);
+				// eTime.postln;
+				([21, 23, 26, 29].includes(eTime.floor.asInteger)).if({
+					soothIt.value();
+				}, {
+					playThem.value(rrand(eTime.lincurve(5, 37.0, 1, 6, -4), eTime.lincurve(5, 37.0, 1, 13, -4)).round);
+				});
 			}, {
 				var args, noSet;
 				args = genArgs.value(1, 0, false);
@@ -331,7 +376,7 @@ OSCdef(\clerk, {|msg, time|
 				});
 			});
 			{ 0.2.wait; holdIt = false }.fork;
-			eTime = (eTime * rrand(1.5, 2)).min(37);
+			eTime = (eTime * rrand(1.25, 2)).min(37);
 		});
 	}, {
 		(msg[2] == 1002).if({
@@ -409,7 +454,7 @@ startUp = {
 			(eTime.lincurve(5.0, 37, 0.1, 1, -6).coin).if({
 				nudgeArgs.value;
 			});
-			eTime = (eTime * rrand(0.8, 0.95)).max(5.0);
+			eTime = (eTime * rrand(0.667, 0.95)).max(5.0);
 			eTime;
 		});
 		
@@ -423,7 +468,7 @@ startUp = {
 			});
 			(0.13.coin).if({
 				// double the mods for a little
-				var fr, ar, fd, r = [];
+				var fr, ar, fd, r = List.new;
 				synths.do({|e, c|
 					(0.6.coin).if({
 						ar = exprand(4.0, 11.0);

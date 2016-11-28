@@ -469,8 +469,8 @@ startUp = {
 			});
 			(0.13.coin).if({
 				// double the mods for a little
-				var fr, ar, fd;
-				synths.do({|e, c|
+				var fr, ar, fd, dead = List.new;
+				synths.do({|e, i|
 					(0.6.coin).if({
 						ar = exprand(4.0, 11.0);
 						fr = exprand(1.0, 5.0);
@@ -481,10 +481,12 @@ startUp = {
 						});
 						e.set(\ar, ar, \fr, fr, \fd, fd);
 						(fd.coin).if({
+							dead.add(e);
 							e.release;
 						});
 					});
 				});
+				synths.removeAll(dead);
 				{
 					rrand(2.0, 5.0).wait;
 					ar = exprand(3.0, 7.0);

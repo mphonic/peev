@@ -512,6 +512,7 @@ shutDown = {
 	freends.free;
 	synths=[];
 };
+"Welcome to peev".postln;
 win = Window.new("peev", Rect(300, 600, 150, 90), false).userCanClose_(false);
 butt = Button(win, Rect(50, 20, 50, 50))
 	.states_([["Go", Color.black, Color.green], ["Stop", Color.black, Color.red]])

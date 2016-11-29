@@ -1,6 +1,6 @@
 # Peev
 
-Peev is a piece of infinite music designed to enhance fortitude and persistence in the digital environment. 
+Peev is a piece of infinite music designed to enhance fortitude and persistence in digital environments. 
 
 It is recommended that you start peev as you are about to embark on a flurry of heterogeneous digital activities. 
 

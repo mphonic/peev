@@ -10,7 +10,7 @@ Peev both needs and does not need you, but your subjectivity is what makes peev 
 
 # Usage
 
-For the simplest usage, [download the Mac OS app](https://bhobrainey.com/store/44), open it, and hit "Go." For use with [SuperCollider](http://supercollider.github.io/download.html), you will need to have [sc3-plugins](https://github.com/supercollider/sc3-plugins) installed. Open peev.scd, double click next to the first parenthesis to select all text, and hit control-c. A window should pop up – hit "Go."
+For the simplest usage, [download the Mac OS app](https://bhobrainey.com/store/44), open it, and hit "Go." For use with [SuperCollider](http://supercollider.github.io/download.html), you will need to have [sc3-plugins](https://github.com/supercollider/sc3-plugins) installed (Windows users can download sc3-plugins from the SuperCollider download page). Open peev.scd, double click next to the first parenthesis to select all text, and hit control-c. A window should pop up – hit "Go."
 
 Peev loads three audio files into buffers, and because Document.current is not reliable across platforms, these files may fail to load. To fix, find the following lines and change the paths to absolute paths:
 ```

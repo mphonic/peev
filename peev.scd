@@ -34,8 +34,8 @@ sad = Buffer.read(s, Document.current.dir ++ "/audio/sax-bright-01.wav");
 melo = Buffer.read(s, Document.current.dir ++ "/audio/sax-bright-02.wav");
 voc = Buffer.read(s, Document.current.dir ++ "/audio/voc-01.wav");
 
-SynthDef(\mouth, {|amp=1, f=3305, fr=0.25, fd=0.2, ar=4, ad=0.9, fmod, amod, a=0.1, b=0.1, c=0.2, d=0.2, gate=1, fade=3, pan=0, shapeBuf=0, out=0|
-	var sig, env;
+SynthDef(\mouth, {|amp=1, f=3305, fr=0.25, fd=0.2, ar=4, ad=0.9, a=0.1, b=0.1, c=0.2, d=0.2, gate=1, fade=3, pan=0, shapeBuf=0, out=0|
+	var sig, env, fmod, amod;
 	fr = fr.lag(Rand(1.0,3.0));
 	fd = fd.lag(Rand(0.9, 2.0));
 	ar = ar.lag(Rand(1.0, 3.0));
@@ -354,7 +354,7 @@ soothIt = {
 		});
 	}.fork;	
 };
-// mouse click and NaN OSC responder 
+// mouse click, amplitude, and NaN OSC responder 
 OSCdef(\clerk, {|msg, time|
 	(msg[2] < 1001).if({
 		(holdIt.not).if({
@@ -385,7 +385,7 @@ OSCdef(\clerk, {|msg, time|
 			amper.free;
 			amper = Synth.tail(goons, \getAmps);
 		}, {
-			// we're getting amplitude for shaped FHN's
+			// we're getting amplitude for mouths and stuff
 			// msg[3].postln;
 			(msg[3] < 0.041).if({
 				saddy.set(\gate, 1);

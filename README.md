@@ -33,8 +33,8 @@ iOn=Image.new(Document.current.dir ++ "/images/ANM026artwork02.jpg");
 ```
 Becomes:
 ```
-iOff=Image.new("your/path/to/images/ANM026artwork01.jpg");
-iOn=Image.new("your/path/to/images/ANM026artwork02.jpg");
+iOff=Image.new("/your/path/to/images/ANM026artwork01.jpg");
+iOn=Image.new("/your/path/to/images/ANM026artwork02.jpg");
 ```
 
 Modify and share. If you care to donate to the peev cause, please [buy the app / code download package](https://bhobrainey.com/store/44).

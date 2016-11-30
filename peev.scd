@@ -391,10 +391,12 @@ OSCdef(\clerk, {|msg, time|
 				saddy.set(\gate, 1);
 				puff.set(\amp, 0.1);
 				hurt.set(\yes, 1);
+				(0.1.coin).if({ munch.set(\gate, [0, 1].wchoose([0.9, 0.1])); });
 			}, {
 				(0.87.coin).if({ saddy.set(\gate, 0); });
 				puff.set(\amp, rrand(0.75, 1.0).squared);
 				(0.1.coin).if({ hurt.set(\yes, 0) });
+				(0.8.coin).if({ munch.set(\gate, 1); });
 			});
 		});
 	});

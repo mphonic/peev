@@ -6,7 +6,7 @@ s.options.sampleRate = 48000;
 s.options.memSize = 262144;
 s.boot;
 s.doWhenBooted{
-var sb, sad, melo, voc, genArgs, nudgeArgs, playThem, stopThem, synths, holdIt = false, puff, puffIt = 0, soothIt, munch, goons, saddy, freends, hurt, amper, eTime = 37, doneDid = false, startUp, shutDown, win, butt, acs;
+var sb, sad, melo, voc, genArgs, nudgeArgs, playThem, stopThem, synths, holdIt = false, puff, puffIt = 0, soothIt, munch, goons, saddy, freends, hurt, amper, eTime = 37, doneDid = false, startUp, shutDown, win, butt, iOn, iOff, acs;
 
 sb = Environment.make({
 	~b = Buffer.alloc(s, 2048, 1, {|buf|
@@ -513,17 +513,44 @@ shutDown = {
 	synths=[];
 };
 "Welcome to peev".postln;
-win = Window.new("peev", Rect(300, 600, 150, 90), false).userCanClose_(false);
-butt = Button(win, Rect(50, 20, 50, 50))
-	.states_([["Go", Color.black, Color.green], ["Stop", Color.black, Color.red]])
-	.action_({|v|
-		(v.value > 0).if({
-			{ startUp.value }.defer;
-		}, {
-			{ shutDown.value }.defer;
+
+(GUI.get(\cocoa).isNil).if({
+	win = Window.new("peev", Rect(300, 600, 150, 90), false).userCanClose_(false);
+	butt = Button(win, Rect(50, 20, 50, 50))
+		.states_([["Go", Color.black, Color.green], ["Stop", Color.black, Color.red]])
+		.action_({|v|
+			(v.value > 0).if({
+				{ startUp.value }.defer;
+			}, {
+				{ shutDown.value }.defer;
+			});
 		});
-	});
-win.front;
+	win.front;
+}, {
+	GUI.cocoa;
+	iOff=Image.new(Document.current.dir ++ "/images/ANM026artwork01.jpg");
+	iOff.scalesWhenResized_(true);
+	iOff.setSize(500, 500);
+	iOn=Image.new(Document.current.dir ++ "/images/ANM026artwork02.jpg");
+	iOn.scalesWhenResized_(true);
+	iOn.setSize(500, 500);
+	win=Window.new("peev", resizable: false).userCanClose_(false);
+	win.setTopLeftBounds(Rect(64, 45, 500, 500));
+	win.view.background_(Color.black);
+	butt=Button.new(win, Rect(-2, -2, 504, 504))
+		.states_([["", Color.new(0,0,0,0),Color.new(0,0,0,0)],["",Color.new(0,0,0,0),Color.new(0,0,0,0)]])
+		.action_({|v|
+			(v.value == 1).if({
+				win.view.backgroundImage_(iOn);
+				{ startUp.value }.defer;
+			}, {
+				win.view.backgroundImage_(iOff);
+				{ shutDown.value }.defer;
+			});
+		});
+	win.view.backgroundImage_(iOff);
+	win.front;
+});
 CmdPeriod.doOnce({
 	sb.do({|e, c|
 		e.free;

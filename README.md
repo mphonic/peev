@@ -26,4 +26,15 @@ voc = Buffer.read(s, "/your/path/to/audio/voc-01.wav");
 ```
 (Many versions of the SuperCollider IDE support dragging files into the editor window to reveal their absolute paths, so do that if you're having trouble.)
 
+If you're a Mac user with Cocoa or are using a version of SuperCollider with a GUI that supports Image, you can use the custom interface. As above, you may have to change some paths to absolute:
+```
+iOff=Image.new(Document.current.dir ++ "/images/ANM026artwork01.jpg");
+iOn=Image.new(Document.current.dir ++ "/images/ANM026artwork02.jpg");
+```
+Becomes:
+```
+iOff=Image.new("/your/path/to/images/ANM026artwork01.jpg");
+iOn=Image.new("/your/path/to/images/ANM026artwork02.jpg");
+```
+
 Modify and share. If you care to donate to the peev cause, please [buy the app / code download package](https://bhobrainey.com/store/44).

@@ -8,6 +8,8 @@ Maximum psychological effects are achieved as you forget that peev is in operati
 
 Peev both needs and does not need you, but your subjectivity is what makes peev real.
 
+![Peev Image](./images/ANM026artwork01.jpg?raw=true)
+
 # Usage
 
 For the simplest usage, [download the Mac OS app](https://bhobrainey.com/store/44), open it, and click on the image that pops up. For use with [SuperCollider](http://supercollider.github.io/download.html), you will need to have [sc3-plugins](https://github.com/supercollider/sc3-plugins) installed (Windows users can download sc3-plugins from the [SuperCollider download page](http://supercollider.github.io/download.html)). Open peev.scd, put your cursor somewhere in the code, and hit ctrl-return (or follow your platform-specific method for executing SuperCollider code). A window should pop up – hit "Go."
